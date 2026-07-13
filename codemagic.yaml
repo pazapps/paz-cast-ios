@@ -16,25 +16,50 @@ workflows:
         script: |
           flutter pub get
 
+          # Localiza o pub-cache (Codemagic usa PUB_CACHE, mas pode estar em vários lugares)
+          PUB_CACHE_DIR="${PUB_CACHE:-$HOME/.pub-cache}"
+          echo "📁 PUB_CACHE: $PUB_CACHE_DIR"
+          ls -la "$PUB_CACHE_DIR/hosted/pub.dev/" | grep -E "quill|google_fonts|flutter_quill" || echo "Procurando em /tmp..."
+          # Se não achar, tenta /tmp
+          [ -d "$PUB_CACHE_DIR" ] || PUB_CACHE_DIR="/tmp/pub_cache"
+          [ -d "$PUB_CACHE_DIR" ] || PUB_CACHE_DIR=$(find / -maxdepth 4 -name "pub.dev" -type d 2>/dev/null | head -1 | xargs dirname 2>/dev/null)
+
           # Patch 1: quill_native_bridge_windows - GMEM_MOVEABLE → GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE
-          QUILL_FILE=$(find ~/.pub-cache -path "*/quill_native_bridge_windows-*/lib/quill_native_bridge_windows.dart" 2>/dev/null | head -1)
-          if [ -n "$QUILL_FILE" ]; then
+          QUILL_FILE=$(find "$PUB_CACHE_DIR" -path "*/quill_native_bridge_windows-*/lib/quill_native_bridge_windows.dart" 2>/dev/null | head -1)
+          if [ -n "$QUILL_FILE" ] && [ -f "$QUILL_FILE" ]; then
             sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE)/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE)/g' "$QUILL_FILE"
             echo "✅ Patch quill_native_bridge_windows: $QUILL_FILE"
+          else
+            echo "⚠️ Arquivo quill_native_bridge_windows não encontrado em $PUB_CACHE_DIR"
+            find / -maxdepth 5 -name "quill_native_bridge_windows.dart" 2>/dev/null
           fi
 
           # Patch 2: google_fonts - const → final (FontWeight const map error)
-          GOOGLE_FONTS_FILE=$(find ~/.pub-cache -path "*/google_fonts-*/lib/src/google_fonts_variant.dart" 2>/dev/null | head -1)
-          if [ -n "$GOOGLE_FONTS_FILE" ]; then
+          GOOGLE_FONTS_FILE=$(find "$PUB_CACHE_DIR" -path "*/google_fonts-*/lib/src/google_fonts_variant.dart" 2>/dev/null | head -1)
+          if [ -n "$GOOGLE_FONTS_FILE" ] && [ -f "$GOOGLE_FONTS_FILE" ]; then
             sed -i '' 's/const _fontWeightToFilenameWeightParts = {/final _fontWeightToFilenameWeightParts = {/' "$GOOGLE_FONTS_FILE"
             echo "✅ Patch google_fonts: $GOOGLE_FONTS_FILE"
+          else
+            echo "⚠️ Arquivo google_fonts_variant não encontrado"
           fi
 
           # Patch 3: flutter_quill - adicionar onFocusReceived
-          QUILL_MIXIN_FILE=$(find ~/.pub-cache -path "*/flutter_quill-*/lib/src/editor/raw_editor/raw_editor_state_text_input_client_mixin.dart" 2>/dev/null | head -1)
-          if [ -n "$QUILL_MIXIN_FILE" ]; then
-            sed -i '' '$ s/^}/  @override\n  bool onFocusReceived() => false;\n}/' "$QUILL_MIXIN_FILE"
+          QUILL_MIXIN_FILE=$(find "$PUB_CACHE_DIR" -path "*/flutter_quill-*/lib/src/editor/raw_editor/raw_editor_state_text_input_client_mixin.dart" 2>/dev/null | head -1)
+          if [ -n "$QUILL_MIXIN_FILE" ] && [ -f "$QUILL_MIXIN_FILE" ]; then
+            # Usa python para substituir de forma confiável (BSD sed não aceita \n)
+            python3 -c "
+content = open('$QUILL_MIXIN_FILE').read()
+content = content.rstrip()
+if content.endswith('}'):
+    content = content[:-1] + '  @override\n  bool onFocusReceived() => false;\n}'
+open('$QUILL_MIXIN_FILE', 'w').write(content)
+print('✅ Patch flutter_quill (onFocusReceived)')
+" 2>/dev/null || sed -i '' '$ s/^}/  @override\
+  bool onFocusReceived() => false;\
+}/' "$QUILL_MIXIN_FILE"
             echo "✅ Patch flutter_quill (onFocusReceived): $QUILL_MIXIN_FILE"
+          else
+            echo "⚠️ Arquivo flutter_quill mixin não encontrado"
           fi
 
       - name: Instalar dependências do CocoaPods
