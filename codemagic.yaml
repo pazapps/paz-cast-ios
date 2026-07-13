@@ -4,7 +4,7 @@ workflows:
     max_build_duration: 60
     instance_type: mac_mini_m2
     environment:
-      flutter: stable
+      flutter: 3.24.5
       xcode: latest
       cocoapods: default
       vars:
@@ -15,10 +15,21 @@ workflows:
     scripts:
       - name: Aplicar patches e instalar dependências
         script: |
-          # Patch: quill_native_bridge_windows com win32 5.x
-          sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE/' \
-            "$FLUTTER_ROOT/.pub-cache/hosted/pub.dev/quill_native_bridge_windows-0.0.2/lib/quill_native_bridge_windows.dart" 2>/dev/null || true
+          # Patch: quill_native_bridge_windows com win32 5.x (GMEM_MOVEABLE movido para GLOBAL_ALLOC_FLAGS)
+          PATCH_FILE=$(find ~/.pub-cache ~/Library/Developer -path "*/quill_native_bridge_windows-0.0.2/lib/quill_native_bridge_windows.dart" 2>/dev/null | head -1)
+          if [ -n "$PATCH_FILE" ]; then
+            sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE/' "$PATCH_FILE"
+            echo "Patch aplicado em: $PATCH_FILE"
+          else
+            echo "Arquivo do quill_native_bridge_windows não encontrado, tentando após pub get..."
+          fi
           flutter pub get
+          # Tentar novamente após flutter pub get, caso o arquivo seja baixado agora
+          PATCH_FILE=$(find ~/.pub-cache ~/Library/Developer -path "*/quill_native_bridge_windows-0.0.2/lib/quill_native_bridge_windows.dart" 2>/dev/null | head -1)
+          if [ -n "$PATCH_FILE" ]; then
+            sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE/' "$PATCH_FILE"
+            echo "Patch (pós pub get) aplicado em: $PATCH_FILE"
+          fi
 
       - name: Build Android APK Release
         script: |
@@ -40,7 +51,7 @@ workflows:
     max_build_duration: 90
     instance_type: mac_mini_m2
     environment:
-      flutter: stable
+      flutter: 3.24.5
       xcode: latest
       cocoapods: default
       vars:
@@ -52,10 +63,21 @@ workflows:
     scripts:
       - name: Aplicar patches e instalar dependências
         script: |
-          # Patch: quill_native_bridge_windows com win32 5.x
-          sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE/' \
-            "$FLUTTER_ROOT/.pub-cache/hosted/pub.dev/quill_native_bridge_windows-0.0.2/lib/quill_native_bridge_windows.dart" 2>/dev/null || true
+          # Patch: quill_native_bridge_windows com win32 5.x (GMEM_MOVEABLE movido para GLOBAL_ALLOC_FLAGS)
+          PATCH_FILE=$(find ~/.pub-cache ~/Library/Developer -path "*/quill_native_bridge_windows-0.0.2/lib/quill_native_bridge_windows.dart" 2>/dev/null | head -1)
+          if [ -n "$PATCH_FILE" ]; then
+            sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE/' "$PATCH_FILE"
+            echo "Patch aplicado em: $PATCH_FILE"
+          else
+            echo "Arquivo do quill_native_bridge_windows não encontrado, tentando após pub get..."
+          fi
           flutter pub get
+          # Tentar novamente após flutter pub get, caso o arquivo seja baixado agora
+          PATCH_FILE=$(find ~/.pub-cache ~/Library/Developer -path "*/quill_native_bridge_windows-0.0.2/lib/quill_native_bridge_windows.dart" 2>/dev/null | head -1)
+          if [ -n "$PATCH_FILE" ]; then
+            sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE/' "$PATCH_FILE"
+            echo "Patch (pós pub get) aplicado em: $PATCH_FILE"
+          fi
 
       - name: Instalar dependências do CocoaPods
         script: |
