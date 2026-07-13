@@ -34,7 +34,7 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
-/ios/Runner/GoogleService-Info.plist
+# /ios/Runner/GoogleService-Info.plist — removido do gitignore pois é necessário no Xcode project
 
 # Symbolication related
 app.*.symbols
