@@ -7,13 +7,12 @@ workflows:
       flutter: stable
       xcode: latest
       cocoapods: default
-      # Code Signing - Configurar no Codemagic > Environment variables:
-      # 1. Opção A (App Store Connect API):
+      # Code Signing automático via App Store Connect API
+      # ⚠️ Configure estas variáveis no Codemagic > Environment variables:
       #    - APP_STORE_CONNECT_ISSUER_ID
       #    - APP_STORE_CONNECT_KEY_IDENTIFIER
       #    - APP_STORE_CONNECT_PRIVATE_KEY
-      # 2. Opção B (Manual - P12 + Provisioning Profile):
-      #    - CERTIFICATE_PRIVATE_KEY
+      #    (opcional) CERTIFICATE_PRIVATE_KEY - se usar certificado manual
     cache:
       cache_paths:
         - ~/.pub-cache
@@ -40,9 +39,9 @@ workflows:
         script: |
           cd ios && pod install --repo-update
 
-      - name: Build iOS (sem codesign)
+      - name: Build iOS (release)
         script: |
-          flutter build ios --release --no-codesign \
+          flutter build ios --release \
             --build-name=1.3.2 \
             --build-number=$(($(date +%s)))
 
@@ -62,3 +61,13 @@ workflows:
         notify:
           success: true
           failure: true
+      app_store_connect:
+        auth: APP_STORE_CONNECT_API_KEY
+        submit_to_testflight: true
+        submit_to_app_store: false
+        # Opcional: liberar automaticamente para testadores do TestFlight
+        beta_groups:
+          - "Testadores Internos"
+        # Opcional: enviar notas de versão
+        release_type: MANUAL
+        copyright: "Paz Castanhal"
