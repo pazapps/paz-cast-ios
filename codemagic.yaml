@@ -7,8 +7,6 @@ workflows:
       flutter: stable
       xcode: latest
       cocoapods: default
-      vars:
-        GOOGLE_API_KEY: "" # Preencher no Codemagic (UI > Environment variables)
     cache:
       cache_paths:
         - ~/.pub-cache
@@ -34,7 +32,6 @@ workflows:
           # Patch 3: flutter_quill - adicionar onFocusReceived
           QUILL_MIXIN_FILE=$(find ~/.pub-cache -path "*/flutter_quill-*/lib/src/editor/raw_editor/raw_editor_state_text_input_client_mixin.dart" 2>/dev/null | head -1)
           if [ -n "$QUILL_MIXIN_FILE" ]; then
-            # Adiciona onFocusReceived antes do último fechamento da classe
             sed -i '' '$ s/^}/  @override\n  bool onFocusReceived() => false;\n}/' "$QUILL_MIXIN_FILE"
             echo "✅ Patch flutter_quill (onFocusReceived): $QUILL_MIXIN_FILE"
           fi
@@ -62,8 +59,6 @@ workflows:
       flutter: stable
       xcode: latest
       cocoapods: default
-      vars:
-        GOOGLE_API_KEY: "" # Preencher no Codemagic (UI > Environment variables)
     cache:
       cache_paths:
         - ~/.pub-cache
@@ -120,3 +115,14 @@ workflows:
         notify:
           success: true
           failure: true
+    publishing:
+      email:
+        recipients:
+          - renierrocha@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  paz_castanhal_ios:
+    name: Paz Castanhal - iOS
+    max_build_duration: 90
