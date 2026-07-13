@@ -40,22 +40,15 @@ workflows:
         script: |
           cd ios && pod install --repo-update
 
-      - name: Build iOS Release
+      - name: Build iOS IPA
         script: |
-          flutter build ios --release \
+          flutter build ipa --release \
             --build-name=1.3.2 \
             --build-number=$(($(date +%s))) \
             --export-method development
-
-      - name: Empacotar como IPA
-        script: |
-          mkdir -p build/ios/ipa/Payload
-          cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
-          cd build/ios/ipa
-          zip -r ../../../../build/ios/ipa/PazCastanhal.ipa Payload/
     artifacts:
-      - build/ios/ipa/PazCastanhal.ipa
-      - build/ios/iphoneos/Runner.app
+      - build/ios/ipa/*.ipa
+      - build/ios/archive/Runner.xcarchive
     publishing:
       email:
         recipients:
