@@ -115,14 +115,3 @@ workflows:
         notify:
           success: true
           failure: true
-    publishing:
-      email:
-        recipients:
-          - renierrocha@gmail.com
-        notify:
-          success: true
-          failure: true
-
-  paz_castanhal_ios:
-    name: Paz Castanhal - iOS
-    max_build_duration: 90
