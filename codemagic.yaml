@@ -4,7 +4,7 @@ workflows:
     max_build_duration: 60
     instance_type: mac_mini_m2
     environment:
-      flutter: 3.24.5
+      flutter: stable
       xcode: latest
       cocoapods: default
       vars:
@@ -13,22 +13,30 @@ workflows:
       cache_paths:
         - ~/.pub-cache
     scripts:
-      - name: Aplicar patches e instalar dependências
+      - name: Aplicar patches nos pacotes
         script: |
-          # Patch: quill_native_bridge_windows com win32 5.x (GMEM_MOVEABLE movido para GLOBAL_ALLOC_FLAGS)
-          PATCH_FILE=$(find ~/.pub-cache ~/Library/Developer -path "*/quill_native_bridge_windows-0.0.2/lib/quill_native_bridge_windows.dart" 2>/dev/null | head -1)
-          if [ -n "$PATCH_FILE" ]; then
-            sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE/' "$PATCH_FILE"
-            echo "Patch aplicado em: $PATCH_FILE"
-          else
-            echo "Arquivo do quill_native_bridge_windows não encontrado, tentando após pub get..."
-          fi
           flutter pub get
-          # Tentar novamente após flutter pub get, caso o arquivo seja baixado agora
-          PATCH_FILE=$(find ~/.pub-cache ~/Library/Developer -path "*/quill_native_bridge_windows-0.0.2/lib/quill_native_bridge_windows.dart" 2>/dev/null | head -1)
-          if [ -n "$PATCH_FILE" ]; then
-            sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE/' "$PATCH_FILE"
-            echo "Patch (pós pub get) aplicado em: $PATCH_FILE"
+
+          # Patch 1: quill_native_bridge_windows - GMEM_MOVEABLE → GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE
+          QUILL_FILE=$(find ~/.pub-cache -path "*/quill_native_bridge_windows-*/lib/quill_native_bridge_windows.dart" 2>/dev/null | head -1)
+          if [ -n "$QUILL_FILE" ]; then
+            sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE)/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE)/g' "$QUILL_FILE"
+            echo "✅ Patch quill_native_bridge_windows: $QUILL_FILE"
+          fi
+
+          # Patch 2: google_fonts - const → final (FontWeight const map error)
+          GOOGLE_FONTS_FILE=$(find ~/.pub-cache -path "*/google_fonts-*/lib/src/google_fonts_variant.dart" 2>/dev/null | head -1)
+          if [ -n "$GOOGLE_FONTS_FILE" ]; then
+            sed -i '' 's/const _fontWeightToFilenameWeightParts = {/final _fontWeightToFilenameWeightParts = {/' "$GOOGLE_FONTS_FILE"
+            echo "✅ Patch google_fonts: $GOOGLE_FONTS_FILE"
+          fi
+
+          # Patch 3: flutter_quill - adicionar onFocusReceived
+          QUILL_MIXIN_FILE=$(find ~/.pub-cache -path "*/flutter_quill-*/lib/src/editor/raw_editor/raw_editor_state_text_input_client_mixin.dart" 2>/dev/null | head -1)
+          if [ -n "$QUILL_MIXIN_FILE" ]; then
+            # Adiciona onFocusReceived antes do último fechamento da classe
+            sed -i '' '$ s/^}/  @override\n  bool onFocusReceived() => false;\n}/' "$QUILL_MIXIN_FILE"
+            echo "✅ Patch flutter_quill (onFocusReceived): $QUILL_MIXIN_FILE"
           fi
 
       - name: Build Android APK Release
@@ -51,7 +59,7 @@ workflows:
     max_build_duration: 90
     instance_type: mac_mini_m2
     environment:
-      flutter: 3.24.5
+      flutter: stable
       xcode: latest
       cocoapods: default
       vars:
@@ -61,22 +69,29 @@ workflows:
         - ~/.pub-cache
         - ~/.cocoapods
     scripts:
-      - name: Aplicar patches e instalar dependências
+      - name: Aplicar patches nos pacotes
         script: |
-          # Patch: quill_native_bridge_windows com win32 5.x (GMEM_MOVEABLE movido para GLOBAL_ALLOC_FLAGS)
-          PATCH_FILE=$(find ~/.pub-cache ~/Library/Developer -path "*/quill_native_bridge_windows-0.0.2/lib/quill_native_bridge_windows.dart" 2>/dev/null | head -1)
-          if [ -n "$PATCH_FILE" ]; then
-            sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE/' "$PATCH_FILE"
-            echo "Patch aplicado em: $PATCH_FILE"
-          else
-            echo "Arquivo do quill_native_bridge_windows não encontrado, tentando após pub get..."
-          fi
           flutter pub get
-          # Tentar novamente após flutter pub get, caso o arquivo seja baixado agora
-          PATCH_FILE=$(find ~/.pub-cache ~/Library/Developer -path "*/quill_native_bridge_windows-0.0.2/lib/quill_native_bridge_windows.dart" 2>/dev/null | head -1)
-          if [ -n "$PATCH_FILE" ]; then
-            sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE/' "$PATCH_FILE"
-            echo "Patch (pós pub get) aplicado em: $PATCH_FILE"
+
+          # Patch 1: quill_native_bridge_windows - GMEM_MOVEABLE → GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE
+          QUILL_FILE=$(find ~/.pub-cache -path "*/quill_native_bridge_windows-*/lib/quill_native_bridge_windows.dart" 2>/dev/null | head -1)
+          if [ -n "$QUILL_FILE" ]; then
+            sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE)/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE)/g' "$QUILL_FILE"
+            echo "✅ Patch quill_native_bridge_windows: $QUILL_FILE"
+          fi
+
+          # Patch 2: google_fonts - const → final (FontWeight const map error)
+          GOOGLE_FONTS_FILE=$(find ~/.pub-cache -path "*/google_fonts-*/lib/src/google_fonts_variant.dart" 2>/dev/null | head -1)
+          if [ -n "$GOOGLE_FONTS_FILE" ]; then
+            sed -i '' 's/const _fontWeightToFilenameWeightParts = {/final _fontWeightToFilenameWeightParts = {/' "$GOOGLE_FONTS_FILE"
+            echo "✅ Patch google_fonts: $GOOGLE_FONTS_FILE"
+          fi
+
+          # Patch 3: flutter_quill - adicionar onFocusReceived
+          QUILL_MIXIN_FILE=$(find ~/.pub-cache -path "*/flutter_quill-*/lib/src/editor/raw_editor/raw_editor_state_text_input_client_mixin.dart" 2>/dev/null | head -1)
+          if [ -n "$QUILL_MIXIN_FILE" ]; then
+            sed -i '' '$ s/^}/  @override\n  bool onFocusReceived() => false;\n}/' "$QUILL_MIXIN_FILE"
+            echo "✅ Patch flutter_quill (onFocusReceived): $QUILL_MIXIN_FILE"
           fi
 
       - name: Instalar dependências do CocoaPods
