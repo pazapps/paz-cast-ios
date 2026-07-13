@@ -12,6 +12,16 @@ workflows:
         - ~/.pub-cache
         - ~/.cocoapods
     scripts:
+      - name: Configurar ambiente
+        script: |
+          # Gerar GoogleService-Info.plist a partir da variável de ambiente (se configurada)
+          if [ -n "$GOOGLE_SERVICE_INFO_PLIST" ]; then
+            echo "$GOOGLE_SERVICE_INFO_PLIST" > ios/Runner/GoogleService-Info.plist
+            echo "✅ GoogleService-Info.plist gerado"
+          else
+            echo "⚠️ GOOGLE_SERVICE_INFO_PLIST não configurada - Firebase pode falhar"
+          fi
+
       - name: Aplicar patches nos pacotes
         script: |
           flutter pub get
