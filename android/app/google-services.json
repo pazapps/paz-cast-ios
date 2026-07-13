@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "647154132280",
+    "project_id": "pazcastanhal-809cd",
+    "storage_bucket": "pazcastanhal-809cd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:647154132280:android:5ff54ee6ca8bf60a618dcd",
+        "android_client_info": {
+          "package_name": "com.pazcastanhal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "647154132280-kollksqoeuf4ias4tfjo5kmpp8ifk52t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-a9PqW60Tu1VTzLVdGLATIU-ygatRMFc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "647154132280-7e8npabk8gfmb67gcn73onqehkgfsoot.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "647154132280-8ipqnp4ifd2a8ds09br5hv66gm2jhupt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.pazCastanhal"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

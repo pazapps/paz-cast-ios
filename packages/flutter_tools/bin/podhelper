@@ -1,0 +1,24 @@
+# This is a stub podhelper for Flutter projects on CI.
+# Normally, this file is generated and managed by the Flutter tool.
+# For CI builds (Codemagic, etc.), this stub allows CocoaPods to proceed.
+
+def parse_KV_file(file, separator='=')
+  file_abs_path = File.expand_path(file)
+  if !File.exists? file_abs_path
+    return []
+  end
+  File.foreach(file_abs_path).map { |line|
+    line = line.strip
+    line = line.split('#')[0]
+    key_value = line.split(separator)
+    if key_value.length == 2
+      [key_value[0].strip, key_value[1].strip]
+    else
+      nil
+    end
+  }.compact.to_h
+end
+
+def install_all_flutter_pods(install_flutter_engine = true)
+  # No-op stub for CI
+end

@@ -1,0 +1,85 @@
+workflows:
+  paz_castanhal_android:
+    name: Android - APK Assinado
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      vars:
+        GOOGLE_API_KEY: "" # Preencher no Codemagic (UI > Environment variables)
+    cache:
+      cache_paths:
+        - ~/.pub-cache
+    scripts:
+      - name: Aplicar patches e instalar dependências
+        script: |
+          # Patch: quill_native_bridge_windows com win32 5.x
+          sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE/' \
+            "$FLUTTER_ROOT/.pub-cache/hosted/pub.dev/quill_native_bridge_windows-0.0.2/lib/quill_native_bridge_windows.dart" 2>/dev/null || true
+          flutter pub get
+
+      - name: Build Android APK Release
+        script: |
+          flutter build apk --release \
+            --build-name=1.3.2 \
+            --build-number=$(($(date +%s)))
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+    publishing:
+      email:
+        recipients:
+          - renierrocha@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  paz_castanhal_ios:
+    name: iOS - IPA para Teste e Loja
+    max_build_duration: 90
+    instance_type: mac_mini_m2
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      vars:
+        GOOGLE_API_KEY: "" # Preencher no Codemagic (UI > Environment variables)
+    cache:
+      cache_paths:
+        - ~/.pub-cache
+        - ~/.cocoapods
+    scripts:
+      - name: Aplicar patches e instalar dependências
+        script: |
+          # Patch: quill_native_bridge_windows com win32 5.x
+          sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE/' \
+            "$FLUTTER_ROOT/.pub-cache/hosted/pub.dev/quill_native_bridge_windows-0.0.2/lib/quill_native_bridge_windows.dart" 2>/dev/null || true
+          flutter pub get
+
+      - name: Instalar dependências do CocoaPods
+        script: |
+          cd ios && pod install --repo-update
+
+      - name: Build iOS Release (sem codesign)
+        script: |
+          flutter build ios --release --no-codesign \
+            --build-name=1.3.2 \
+            --build-number=$(($(date +%s)))
+
+      - name: Empacotar como IPA
+        script: |
+          mkdir -p build/ios/ipa/Payload
+          cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
+          cd build/ios/ipa
+          zip -r ../../../../build/ios/ipa/PazCastanhal.ipa Payload/
+    artifacts:
+      - build/ios/ipa/PazCastanhal.ipa
+      - build/ios/iphoneos/Runner.app
+    publishing:
+      email:
+        recipients:
+          - renierrocha@gmail.com
+        notify:
+          success: true
+          failure: true

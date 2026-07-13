@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="paz_castanhal">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>paz_castanhal</title>
+  <link rel="manifest" href="manifest.json">
+  <!-- Local font loading: place your font files under web/assets/fonts/ and
+       update names below if you use different files. This avoids runtime
+       requests to fonts.gstatic.com when offline. -->
+  <link rel="preload" href="assets/fonts/Roboto-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Roboto-Medium.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face {
+      font-family: 'RobotoLocal';
+      src: url('assets/fonts/Roboto-Regular.woff2') format('woff2'),
+           url('assets/fonts/Roboto-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'RobotoLocal';
+      src: url('assets/fonts/Roboto-Medium.woff2') format('woff2'),
+           url('assets/fonts/Roboto-Medium.ttf') format('truetype');
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+    /* Ensure flutter uses the local font as a fallback; the app can
+       reference 'RobotoLocal' in its CSS or text styles on the web. */
+    html, body { font-family: 'RobotoLocal', sans-serif; }
+  </style>
+
+  <!-- CanvasKit hosting notes:
+       - If you want to use CanvasKit offline, copy the CanvasKit build
+         (JS/WASM) into `web/canvaskit/` and serve it alongside the app.
+       - After copying, you can either rebuild with the canvaskit renderer
+         and the bootloader should be updated to load from your host, or
+         configure your hosting to serve the same paths used by the
+         Flutter bootloader.
+       - For a simple local test, copy the `canvaskit` directory produced by
+         a previous web build (or the upstream CanvasKit release) into
+         `web/canvaskit/` so the runtime fetches succeed when offline.
+       - See Flutter web docs about CanvasKit and bootloader customization:
+         https://docs.flutter.dev/deployment/web
+  -->
+</head>
+<body>
+  <!--
+    You can customize the "flutter_bootstrap.js" script.
+    This is useful to provide a custom configuration to the Flutter loader
+    or to give the user feedback during the initialization process.
+
+    For more details:
+    * https://docs.flutter.dev/platform-integration/web/initialization
+  -->
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

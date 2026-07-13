@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paz Castanhal — Sua Igreja Conectada com Você</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── RESET & BASE ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-deep:    #020617;
+      --bg-mid:     #0f172a;
+      --bg-card:    rgba(255,255,255,0.04);
+      --indigo:     #6366f1;
+      --indigo-light:#818cf8;
+      --indigo-dark: #4338ca;
+      --blue:       #1e3a8a;
+      --cyan:       #22d3ee;
+      --white:      #f8fafc;
+      --muted:      rgba(248,250,252,0.55);
+      --border:     rgba(255,255,255,0.08);
+      --radius:     20px;
+      --transition: .4s cubic-bezier(.4,0,.2,1);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-deep);
+      color: var(--white);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+
+    /* ─── CANVAS STARS ─────────────────────────────────────── */
+    #stars-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ─── AURORA BLOBS ─────────────────────────────────────── */
+    .aurora {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.18;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .aurora-1 {
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, #6366f1, #4338ca);
+      top: -200px; left: -200px;
+      animation: floatBlob 18s ease-in-out infinite alternate;
+    }
+    .aurora-2 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, #0ea5e9, #22d3ee);
+      bottom: 10%; right: -150px;
+      animation: floatBlob 22s ease-in-out infinite alternate-reverse;
+    }
+    .aurora-3 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #8b5cf6, #6366f1);
+      top: 50%; left: 40%;
+      animation: floatBlob 14s ease-in-out infinite alternate;
+    }
+    @keyframes floatBlob {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(60px, 40px) scale(1.12); }
+    }
+
+    /* ─── LAYOUT ────────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+    section { position: relative; z-index: 1; }
+
+    /* ─── NAV ───────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 16px 0;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(2,6,23,0.7);
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .nav-brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.9rem;
+      color: var(--muted);
+      transition: color var(--transition);
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-cta {
+      background: var(--indigo);
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: background var(--transition), transform .2s;
+    }
+    .nav-cta:hover { background: var(--indigo-light); transform: scale(1.04); }
+
+    /* ─── HERO ──────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 140px 0 80px;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(99,102,241,0.15);
+      border: 1px solid rgba(99,102,241,0.35);
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--indigo-light);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero-eyebrow span.dot {
+      width: 6px; height: 6px;
+      background: var(--indigo-light);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(1.6); }
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+    }
+    .hero h1 .grad {
+      background: linear-gradient(135deg, var(--indigo-light) 0%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 40px;
+      max-width: 480px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--indigo), var(--indigo-dark));
+      padding: 16px 32px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 8px 32px rgba(99,102,241,0.4);
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(99,102,241,0.55); }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 16px 32px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      backdrop-filter: blur(10px);
+      transition: border-color .2s, transform .2s;
+    }
+    .btn-secondary:hover { border-color: var(--indigo); transform: translateY(-3px); }
+    .btn-icon { font-size: 1.2rem; }
+
+    /* ─── HERO MOCKUPS ──────────────────────────────────────── */
+    .hero-visual {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 20px;
+      position: relative;
+    }
+    .phone-mockup {
+      position: relative;
+      background: linear-gradient(160deg, #1e293b, #0f172a);
+      border-radius: 44px;
+      border: 2px solid rgba(255,255,255,0.12);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .phone-mockup::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 120px; height: 28px;
+      background: #0a0a0a;
+      border-radius: 0 0 20px 20px;
+      z-index: 5;
+    }
+    .phone-main {
+      width: 240px;
+      height: 480px;
+      animation: floatPhone 6s ease-in-out infinite;
+    }
+    .phone-side {
+      width: 190px;
+      height: 380px;
+      opacity: 0.7;
+      animation: floatPhone 6s ease-in-out infinite 1.5s;
+    }
+    @keyframes floatPhone {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-18px); }
+    }
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(160deg, #0f172a 0%, #020617 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 40px 20px 20px;
+    }
+    .phone-screen-icon {
+      width: 72px; height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #1e3a8a, #6366f1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 12px 40px rgba(99,102,241,0.4);
+    }
+    .phone-screen-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .phone-screen-subtitle {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    .phone-nav-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 12px; right: 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-around;
+    }
+    .pnb-item {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem;
+    }
+    .pnb-item.active {
+      background: var(--indigo);
+    }
+    .phone-mini-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      padding: 0 4px;
+    }
+    .phone-mini-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pmc-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .pmc-line {
+      height: 6px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 4px;
+      flex: 1;
+    }
+
+    /* ─── STATS BAR ─────────────────────────────────────────── */
+    .stats-bar {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+    }
+    .stat-item {
+      text-align: center;
+      padding: 20px;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-num {
+      font-size: 2.2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--indigo-light), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: block;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ─── FEATURES ──────────────────────────────────────────── */
+    .section-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .section-tag {
+      display: inline-block;
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.25);
+      color: var(--indigo-light);
+      padding: 6px 18px;
+      border-radius: 50px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .section-desc {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .features { padding: 100px 0; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+      cursor: default;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--indigo) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .feature-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(99,102,241,0.4);
+      box-shadow: 0 24px 60px rgba(99,102,241,0.15);
+    }
+    .feature-card:hover::before { opacity: 0.07; }
+    .feature-card.featured {
+      grid-column: span 2;
+      background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(34,211,238,0.05));
+      border-color: rgba(99,102,241,0.25);
+    }
+    .feature-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .feature-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .feature-card p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.65;
+      position: relative;
+      z-index: 1;
+    }
+    .feature-badge {
+      display: inline-block;
+      background: rgba(34,211,238,0.15);
+      border: 1px solid rgba(34,211,238,0.3);
+      color: var(--cyan);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 50px;
+      margin-top: 14px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ─── HOW IT WORKS ──────────────────────────────────────── */
+    .how-it-works { padding: 100px 0; }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      position: relative;
+    }
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 48px; left: calc(16.67% + 24px); right: calc(16.67% + 24px);
+      height: 2px;
+      background: linear-gradient(90deg, var(--indigo), var(--cyan), var(--indigo));
+      background-size: 200% 100%;
+      animation: gradLine 3s linear infinite;
+    }
+    @keyframes gradLine {
+      0%   { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    .step { text-align: center; }
+    .step-num {
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--indigo), var(--indigo-dark));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 24px;
+      position: relative;
+      box-shadow: 0 0 0 16px rgba(99,102,241,0.08), 0 0 0 32px rgba(99,102,241,0.04);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .step:hover .step-num {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 20px rgba(99,102,241,0.12), 0 0 0 40px rgba(99,102,241,0.05);
+    }
+    .step h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+    .step p  { font-size: 0.9rem; color: var(--muted); }
+
+    /* ─── TESTIMONIAL / HIGHLIGHT ───────────────────────────── */
+    .highlight { padding: 100px 0; }
+    .highlight-card {
+      background: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(34,211,238,0.06) 100%);
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 32px;
+      padding: 80px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .highlight-card::before {
+      content: '"';
+      position: absolute;
+      top: -30px; left: 40px;
+      font-size: 20rem;
+      font-weight: 900;
+      color: rgba(99,102,241,0.07);
+      line-height: 1;
+      pointer-events: none;
+    }
+    .highlight-card blockquote {
+      font-size: clamp(1.2rem, 2.5vw, 1.7rem);
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 1;
+    }
+    .highlight-card blockquote .accent {
+      color: var(--indigo-light);
+    }
+    .highlight-stars {
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      letter-spacing: 4px;
+    }
+    .highlight-author {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .author-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--indigo), var(--cyan));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .author-name { font-weight: 700; font-size: 0.95rem; }
+    .author-role { font-size: 0.8rem; color: var(--muted); }
+
+    /* ─── DOWNLOAD ──────────────────────────────────────────── */
+    .download { padding: 100px 0 60px; }
+    .download-card {
+      background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 60%, #0c1a3a 100%);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 40px;
+      padding: 80px 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .download-card::after {
+      content: '';
+      position: absolute;
+      top: -200px; right: -200px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(99,102,241,0.2), transparent 70%);
+      pointer-events: none;
+    }
+    .download-title {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 20px;
+    }
+    .download-desc { color: var(--muted); margin-bottom: 36px; font-size: 1rem; }
+    .store-buttons { display: flex; flex-direction: column; gap: 14px; }
+    .store-btn {
+      display: inline-block;
+      transition: transform .2s, filter .2s;
+    }
+    .store-btn:hover {
+      transform: translateY(-3px);
+      filter: brightness(1.1);
+    }
+    .store-btn img {
+      height: 56px;
+      width: auto;
+      display: block;
+    }
+    .download-visual {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 16px;
+    }
+    .phone-glow {
+      filter: drop-shadow(0 24px 48px rgba(99,102,241,0.4));
+      animation: floatPhone 5s ease-in-out infinite;
+    }
+    .phone-glow-2 {
+      filter: drop-shadow(0 24px 48px rgba(34,211,238,0.3));
+      animation: floatPhone 5s ease-in-out infinite 2s;
+    }
+
+    /* ─── FOOTER ────────────────────────────────────────────── */
+    footer {
+      padding: 48px 0;
+      border-top: 1px solid var(--border);
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+    .footer-brand img { width: 32px; height: 32px; border-radius: 8px; }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 0.85rem; color: var(--muted); transition: color .2s; }
+    .footer-links a:hover { color: var(--white); }
+    .footer-copy { font-size: 0.8rem; color: var(--muted); }
+
+    /* ─── SCROLL REVEAL ─────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── FLOATING PARTICLES ────────────────────────────────── */
+    .particle {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      animation: particleFloat linear infinite;
+    }
+    @keyframes particleFloat {
+      0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.4; }
+      100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* ─── RESPONSIVE ────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .feature-card.featured { grid-column: span 1; }
+      .download-card { grid-template-columns: 1fr; text-align: center; }
+      .store-buttons { align-items: center; }
+      .download-visual { display: none; }
+    }
+    @media (max-width: 768px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 60px; text-align: center; }
+      .hero-desc { margin: 0 auto 40px; }
+      .hero-actions { justify-content: center; }
+      .hero-visual { display: none; }
+      .nav-links { display: none; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stat-item:nth-child(2) { border-right: none; }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; gap: 48px; }
+      .steps-grid::before { display: none; }
+      .highlight-card { padding: 48px 28px; }
+      .download-card { padding: 48px 28px; }
+      .footer-inner { flex-direction: column; align-items: center; text-align: center; }
+    }
+
+    /* ─── GRADIENT BORDER ANIMATION ─────────────────────────── */
+    .glow-border {
+      position: relative;
+    }
+    .glow-border::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      background: linear-gradient(135deg, var(--indigo), var(--cyan), var(--indigo));
+      background-size: 300% 300%;
+      animation: gradBorder 4s linear infinite;
+      z-index: -1;
+    }
+    @keyframes gradBorder {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* ─── TICKER ─────────────────────────────────────────────── */
+    .ticker-wrapper {
+      overflow: hidden;
+      padding: 20px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin: 60px 0;
+      position: relative;
+      z-index: 1;
+    }
+    .ticker-track {
+      display: flex;
+      gap: 48px;
+      animation: ticker 25s linear infinite;
+      white-space: nowrap;
+      width: max-content;
+    }
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .ticker-item span { color: var(--indigo-light); }
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ░░░ BACKGROUND ░░░ -->
+<canvas id="stars-canvas"></canvas>
+<div class="aurora aurora-1"></div>
+<div class="aurora aurora-2"></div>
+<div class="aurora aurora-3"></div>
+
+<!-- ░░░ NAV ░░░ -->
+<nav>
+  <div class="container nav-inner">
+    <div class="nav-brand">
+      <img src="icon_app.png" alt="Paz Castanhal" />
+      Paz Castanhal
+    </div>
+    <ul class="nav-links">
+      <li><a href="#features">Funcionalidades</a></li>
+      <li><a href="#como-funciona">Como Funciona</a></li>
+      <li><a href="#download">Download</a></li>
+    </ul>
+    <a href="#download" class="nav-cta">Baixar Agora</a>
+  </div>
+</nav>
+
+<!-- ░░░ HERO ░░░ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content">
+        <div class="hero-eyebrow reveal">
+          <span class="dot"></span>
+          App da Igreja — Disponível já
+        </div>
+        <h1 class="reveal">
+          Sua Igreja<br/>
+          <span class="grad">conectada com você</span>
+        </h1>
+        <p class="hero-desc reveal">
+          O aplicativo oficial da <strong>Igreja Paz Castanhal</strong>. Bíblia, agenda de eventos,
+          notificações, check-in em cultos e muito mais — tudo em um só lugar.
+        </p>
+        <div class="hero-actions reveal">
+          <a href="#download" class="store-btn">
+            <img src="playstore.png" alt="Disponível no Google Play" />
+          </a>
+          <a href="#download" class="store-btn">
+            <img src="appstore.png" alt="Baixar na App Store" />
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <!-- Phone Main -->
+        <div class="phone-mockup phone-side" style="margin-bottom: 40px;">
+          <div class="phone-screen">
+            <div style="font-size:0.65rem; color: var(--muted); margin-top:8px;">📖 BÍBLIA</div>
+            <div class="phone-mini-cards" style="margin-top:8px;">
+              <div class="phone-mini-card"><div class="pmc-dot" style="background:#6366f1"></div><div class="pmc-line" style="width:70%"></div></div>
+              <div class="phone-mini-card"><div class="pmc-dot" style="background:#22d3ee"></div><div class="pmc-line" style="width:85%"></div></div>
+              <div class="phone-mini-card"><div class="pmc-dot" style="background:#818cf8"></div><div class="pmc-line" style="width:60%"></div></div>
+              <div class="phone-mini-card"><div class="pmc-dot" style="background:#6366f1"></div><div class="pmc-line" style="width:75%"></div></div>
+              <div class="phone-mini-card"><div class="pmc-dot" style="background:#22d3ee"></div><div class="pmc-line" style="width:50%"></div></div>
+            </div>
+          </div>
+          <div class="phone-nav-bar">
+            <div class="pnb-item">🏠</div>
+            <div class="pnb-item">🔔</div>
+            <div class="pnb-item active">📖</div>
+            <div class="pnb-item">👤</div>
+          </div>
+        </div>
+
+        <div class="phone-mockup phone-main">
+          <div class="phone-screen">
+            <div class="phone-screen-icon">✝️</div>
+            <div class="phone-screen-title">Paz Castanhal</div>
+            <div class="phone-screen-subtitle">Bem-vindo à sua comunidade</div>
+            <div class="phone-mini-cards" style="margin-top:4px;">
+              <div class="phone-mini-card">
+                <div class="pmc-dot" style="background:#6366f1"></div>
+                <div>
+                  <div style="font-size:0.6rem;color:#fff;font-weight:600;">📅 Agenda</div>
+                  <div class="pmc-line" style="margin-top:3px;width:80%"></div>
+                </div>
+              </div>
+              <div class="phone-mini-card">
+                <div class="pmc-dot" style="background:#22d3ee"></div>
+                <div>
+                  <div style="font-size:0.6rem;color:#fff;font-weight:600;">📢 Avisos</div>
+                  <div class="pmc-line" style="margin-top:3px;width:65%"></div>
+                </div>
+              </div>
+              <div class="phone-mini-card">
+                <div class="pmc-dot" style="background:#f59e0b"></div>
+                <div>
+                  <div style="font-size:0.6rem;color:#fff;font-weight:600;">⚡ Volts</div>
+                  <div class="pmc-line" style="margin-top:3px;width:55%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-nav-bar">
+            <div class="pnb-item active">🏠</div>
+            <div class="pnb-item">🔔</div>
+            <div class="pnb-item">📅</div>
+            <div class="pnb-item">📖</div>
+            <div class="pnb-item">👤</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░░ TICKER ░░░ -->
+<div class="ticker-wrapper">
+  <div class="ticker-track">
+    <div class="ticker-item">📖 <span>Bíblia Completa</span></div>
+    <div class="ticker-item">📅 <span>Agenda de Eventos</span></div>
+    <div class="ticker-item">🔔 <span>Notificações Push</span></div>
+    <div class="ticker-item">✅ <span>Check-in com QR Code</span></div>
+    <div class="ticker-item">✍️ <span>Anotações Pessoais</span></div>
+    <div class="ticker-item">⚡ <span>Sistema de Pontos Volts</span></div>
+    <div class="ticker-item">🏆 <span>Ranking da Comunidade</span></div>
+    <div class="ticker-item">🔐 <span>Login Seguro com Google</span></div>
+    <!-- repeat for seamless loop -->
+    <div class="ticker-item">📖 <span>Bíblia Completa</span></div>
+    <div class="ticker-item">📅 <span>Agenda de Eventos</span></div>
+    <div class="ticker-item">🔔 <span>Notificações Push</span></div>
+    <div class="ticker-item">✅ <span>Check-in com QR Code</span></div>
+    <div class="ticker-item">✍️ <span>Anotações Pessoais</span></div>
+    <div class="ticker-item">⚡ <span>Sistema de Pontos Volts</span></div>
+    <div class="ticker-item">🏆 <span>Ranking da Comunidade</span></div>
+    <div class="ticker-item">🔐 <span>Login Seguro com Google</span></div>
+  </div>
+</div>
+
+<!-- ░░░ STATS ░░░ -->
+<section class="stats-bar">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item reveal"><span class="stat-num">66</span><span class="stat-label">Livros da Bíblia</span></div>
+      <div class="stat-item reveal"><span class="stat-num">1189</span><span class="stat-label">Capítulos disponíveis</span></div>
+      <div class="stat-item reveal"><span class="stat-num">5</span><span class="stat-label">Módulos completos</span></div>
+      <div class="stat-item reveal"><span class="stat-num">100%</span><span class="stat-label">Gratuito para membros</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░░ FEATURES ░░░ -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">Funcionalidades</div>
+      <h2 class="section-title">Tudo que sua comunidade precisa</h2>
+      <p class="section-desc">Um ecossistema completo para conectar membros, pastores e líderes em um só app.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card featured reveal">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #1e3a8a22, #6366f133);">📖</div>
+        <h3>Bíblia Sagrada Completa</h3>
+        <p>Leia os 66 livros do Velho e Novo Testamento com modo de leitura imersivo, versículos marcados, busca rápida por livro e capítulo, e sincronização com sua conta.</p>
+        <span class="feature-badge">Offline disponível</span>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #f59e0b22, #f59e0b33);">⚡</div>
+        <h3>Sistema Volts</h3>
+        <p>Ganhe pontos por presença nos cultos, participe do ranking mensal e acompanhe seu crescimento na comunidade.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #22d3ee22, #22d3ee33);">✅</div>
+        <h3>Check-in por QR Code</h3>
+        <p>Registre sua presença em cultos e eventos de forma rápida e segura com leitura de QR Code integrada.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #10b98122, #10b98133);">📅</div>
+        <h3>Agenda de Eventos</h3>
+        <p>Fique por dentro de cultos, retiros, conferências e eventos especiais. Inscreva-se com um toque.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #8b5cf622, #8b5cf633);">✍️</div>
+        <h3>Anotações Pessoais</h3>
+        <p>Salve reflexões, versículos favoritos e mensagens dos cultos. Suas anotações ficam seguras na nuvem.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon" style="background: linear-gradient(135deg, #ef444422, #ef444433);">🔔</div>
+        <h3>Notificações em Tempo Real</h3>
+        <p>Receba avisos importantes da liderança, lembretes de eventos e novidades da igreja direto no celular.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░░ HOW IT WORKS ░░░ -->
+<section class="how-it-works" id="como-funciona">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-tag">Como Funciona</div>
+      <h2 class="section-title">Comece em 3 passos simples</h2>
+      <p class="section-desc">Sem complicação. Em menos de 2 minutos você já está conectado à sua comunidade.</p>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step reveal">
+        <div class="step-num">📲</div>
+        <h3>1. Baixe o App</h3>
+        <p>Disponível gratuitamente na Google Play Store e na Apple App Store para Android e iOS.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">🔐</div>
+        <h3>2. Faça Login</h3>
+        <p>Entre com sua conta Google de forma rápida e segura. Seus dados ficam protegidos no Firebase.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">✝️</div>
+        <h3>3. Conecte-se</h3>
+        <p>Acesse a Bíblia, veja a agenda, receba avisos e participe ativamente da sua comunidade.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░░ DOWNLOAD ░░░ -->
+<section class="download" id="download">
+  <div class="container">
+    <div class="download-card reveal">
+      <div class="download-content">
+        <h2 class="download-title">
+          Baixe agora e<br/>
+          <span style="background: linear-gradient(135deg, var(--indigo-light), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">conecte-se conosco!</span>
+        </h2>
+        <p class="download-desc">
+          Disponível para Android e iOS. Gratuito para todos os membros da Igreja Paz Castanhal.
+        </p>
+        <div class="store-buttons">
+          <a href="#" class="store-btn">
+            <img src="playstore.png" alt="Disponível no Google Play" />
+          </a>
+          <a href="#" class="store-btn">
+            <img src="appstore.png" alt="Baixar na App Store" />
+          </a>
+        </div>
+      </div>
+
+      <div class="download-visual">
+        <div class="phone-mockup phone-side phone-glow-2" style="margin-bottom:30px;">
+          <div class="phone-screen">
+            <div style="font-size:0.6rem;color:var(--muted);margin-top:6px;">🏆 RANKING</div>
+            <div class="phone-mini-cards" style="margin-top:8px;">
+              <div class="phone-mini-card"><div style="font-size:0.8rem">🥇</div><div style="flex:1"><div class="pmc-line" style="width:90%"></div></div></div>
+              <div class="phone-mini-card"><div style="font-size:0.8rem">🥈</div><div style="flex:1"><div class="pmc-line" style="width:75%"></div></div></div>
+              <div class="phone-mini-card"><div style="font-size:0.8rem">🥉</div><div style="flex:1"><div class="pmc-line" style="width:60%"></div></div></div>
+              <div class="phone-mini-card"><div style="font-size:0.7rem;color:var(--muted)">4</div><div style="flex:1"><div class="pmc-line" style="width:45%"></div></div></div>
+            </div>
+          </div>
+          <div class="phone-nav-bar">
+            <div class="pnb-item">🏠</div>
+            <div class="pnb-item active">⚡</div>
+            <div class="pnb-item">📖</div>
+            <div class="pnb-item">👤</div>
+          </div>
+        </div>
+
+        <div class="phone-mockup phone-main phone-glow">
+          <div class="phone-screen">
+            <div class="phone-screen-icon">✝️</div>
+            <div class="phone-screen-title">Paz Castanhal</div>
+            <div class="phone-screen-subtitle">Versão 1.0 • Android & iOS</div>
+            <div class="phone-mini-cards" style="margin-top:8px;">
+              <div class="phone-mini-card"><div class="pmc-dot" style="background:#6366f1"></div><div class="pmc-line"></div></div>
+              <div class="phone-mini-card"><div class="pmc-dot" style="background:#22d3ee"></div><div class="pmc-line" style="width:80%"></div></div>
+              <div class="phone-mini-card"><div class="pmc-dot" style="background:#f59e0b"></div><div class="pmc-line" style="width:65%"></div></div>
+            </div>
+          </div>
+          <div class="phone-nav-bar">
+            <div class="pnb-item active">🏠</div>
+            <div class="pnb-item">🔔</div>
+            <div class="pnb-item">📅</div>
+            <div class="pnb-item">📖</div>
+            <div class="pnb-item">👤</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░░ FOOTER ░░░ -->
+<footer>
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <img src="icon_app.png" alt="Paz Castanhal" />
+      Paz Castanhal
+    </div>
+    <div class="footer-links">
+      <a href="privacy_policy.html">Política de Privacidade</a>
+      <a href="mailto:contato@pazcastanhal.com.br">Contato</a>
+    </div>
+    <div class="footer-copy">&copy; 2026 Igreja Paz Castanhal. Todos os direitos reservados.</div>
+  </div>
+</footer>
+
+<!-- ░░░ SCRIPTS ░░░ -->
+<script>
+  /* ── Stars Canvas ── */
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function initStars(n = 160) {
+    stars = Array.from({ length: n }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.4 + 0.2,
+      a: Math.random(),
+      speed: Math.random() * 0.004 + 0.001,
+      dir: Math.random() > 0.5 ? 1 : -1,
+    }));
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const s of stars) {
+      s.a += s.speed * s.dir;
+      if (s.a > 1 || s.a < 0) s.dir *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(148,163,184,${s.a * 0.7})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  resize();
+  initStars();
+  drawStars();
+  window.addEventListener('resize', () => { resize(); initStars(); });
+
+  /* ── Floating Particles ── */
+  const colors = ['#6366f1', '#818cf8', '#22d3ee', '#a5b4fc', '#38bdf8'];
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 5 + 2;
+    const left = Math.random() * 100;
+    const dur  = Math.random() * 20 + 14;
+    const delay = Math.random() * 15;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${left}vw;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      opacity:${Math.random()*0.5+0.1};
+      animation-duration:${dur}s;
+      animation-delay:-${delay}s;
+    `;
+    document.body.appendChild(p);
+  }
+
+  /* ── Scroll Reveal ── */
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+
+  /* ── Nav scroll style ── */
+  window.addEventListener('scroll', () => {
+    document.querySelector('nav').style.background =
+      window.scrollY > 40 ? 'rgba(2,6,23,0.92)' : 'rgba(2,6,23,0.7)';
+  });
+
+  /* ── Mouse parallax on hero ── */
+  document.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth  - 0.5) * 20;
+    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+    document.querySelector('.aurora-1').style.transform = `translate(${x}px, ${y}px)`;
+    document.querySelector('.aurora-2').style.transform = `translate(${-x}px, ${-y}px)`;
+  });
+</script>
+</body>
+</html>
