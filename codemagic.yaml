@@ -68,6 +68,3 @@ workflows:
         # Opcional: liberar automaticamente para testadores do TestFlight
         beta_groups:
           - "Testadores Internos"
-        # Opcional: enviar notas de versão
-        release_type: MANUAL
-        copyright: "Paz Castanhal"
