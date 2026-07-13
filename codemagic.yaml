@@ -56,17 +56,10 @@ workflows:
           # Patch 3: flutter_quill - adicionar onFocusReceived
           QUILL_MIXIN_FILE=$(find "$PUB_CACHE_DIR" -path "*/flutter_quill-*/lib/src/editor/raw_editor/raw_editor_state_text_input_client_mixin.dart" 2>/dev/null | head -1)
           if [ -n "$QUILL_MIXIN_FILE" ] && [ -f "$QUILL_MIXIN_FILE" ]; then
-            # Usa python para substituir de forma confiável (BSD sed não aceita \n)
-            python3 -c "
-content = open('$QUILL_MIXIN_FILE').read()
-content = content.rstrip()
-if content.endswith('}'):
-    content = content[:-1] + '  @override\n  bool onFocusReceived() => false;\n}'
-open('$QUILL_MIXIN_FILE', 'w').write(content)
-print('✅ Patch flutter_quill (onFocusReceived)')
-" 2>/dev/null || sed -i '' '$ s/^}/  @override\
-  bool onFocusReceived() => false;\
-}/' "$QUILL_MIXIN_FILE"
+            # Remove o último } e adiciona o método + } (one-liner para evitar problemas YAML)
+            tail -n +1 "$QUILL_MIXIN_FILE" | head -n -1 > "${QUILL_MIXIN_FILE}.tmp"
+            printf '  @override\n  bool onFocusReceived() => false;\n}\n' >> "${QUILL_MIXIN_FILE}.tmp"
+            mv "${QUILL_MIXIN_FILE}.tmp" "$QUILL_MIXIN_FILE"
             echo "✅ Patch flutter_quill (onFocusReceived): $QUILL_MIXIN_FILE"
           else
             echo "⚠️ Arquivo flutter_quill mixin não encontrado"
