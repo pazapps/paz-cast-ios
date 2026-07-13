@@ -7,6 +7,13 @@ workflows:
       flutter: stable
       xcode: latest
       cocoapods: default
+      # Code Signing - Configurar no Codemagic > Environment variables:
+      # 1. Opção A (App Store Connect API):
+      #    - APP_STORE_CONNECT_ISSUER_ID
+      #    - APP_STORE_CONNECT_KEY_IDENTIFIER
+      #    - APP_STORE_CONNECT_PRIVATE_KEY
+      # 2. Opção B (Manual - P12 + Provisioning Profile):
+      #    - CERTIFICATE_PRIVATE_KEY
     cache:
       cache_paths:
         - ~/.pub-cache
@@ -26,69 +33,19 @@ workflows:
         script: |
           flutter pub get
 
-          # Debug: mostra onde o pub-cache está
-          echo "📁 PWD: $(pwd)"
-          echo "📁 HOME: $HOME"
-          echo "📁 PUB_CACHE env: ${PUB_CACHE:-não definida}"
-          echo "📁 PUB_HOSTED_URL: ${PUB_HOSTED_URL:-não definida}"
-          ls -la "$(dirname "$(pwd)")/.pub-cache/hosted/pub.dev/" 2>/dev/null | grep -E "quill|google_fonts|flutter_quill" || echo "⚠️ Não achou em $(dirname "$(pwd)")/.pub-cache"
-          ls -la "$HOME/.pub-cache/hosted/pub.dev/" 2>/dev/null | grep -E "quill|google_fonts|flutter_quill" || echo "⚠️ Não achou em \$HOME/.pub-cache"
-
-          # Patch 1: quill_native_bridge_windows - procura em TODOS os lugares possíveis
-          for dir in "$(dirname "$(pwd)")/.pub-cache" "$HOME/.pub-cache" "$HOME/.cache/pub" "${PUB_CACHE}" /tmp/pub_cache /tmp/.pub-cache /Users/builder/.pub-cache; do
-            [ -z "$dir" ] && continue
-            QUILL_FILE=$(find "$dir" -path "*/quill_native_bridge_windows-*/lib/quill_native_bridge_windows.dart" 2>/dev/null | head -1)
-            if [ -n "$QUILL_FILE" ] && [ -f "$QUILL_FILE" ]; then
-              sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE)/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE)/g' "$QUILL_FILE"
-              echo "✅ Patch quill_native_bridge_windows: $QUILL_FILE"
-              break
-            fi
-          done
-          # Fallback extremo
-          if ! grep -q "GLOBAL_ALLOC_FLAGS" /dev/null 2>/dev/null; then
-            FOUND=$(find / -maxdepth 8 -name "quill_native_bridge_windows.dart" 2>/dev/null | head -3)
-            if [ -n "$FOUND" ]; then
-              for f in $FOUND; do
-                sed -i '' 's/GlobalAlloc(GMEM_MOVEABLE)/GlobalAlloc(GLOBAL_ALLOC_FLAGS.GMEM_MOVEABLE)/g' "$f"
-                echo "✅ Patch fallback: $f"
-              done
-            else
-              echo "❌ quill_native_bridge_windows.dart NÃO ENCONTRADO EM LUGAR NENHUM"
-            fi
-          fi
-
-          # Patch 2: google_fonts - const → final
-          for dir in "$(dirname "$(pwd)")/.pub-cache" "$HOME/.pub-cache" "$HOME/.cache/pub" "${PUB_CACHE}" /tmp/pub_cache /tmp/.pub-cache /Users/builder/.pub-cache; do
-            [ -z "$dir" ] && continue
-            GOOGLE_FONTS_FILE=$(find "$dir" -path "*/google_fonts-*/lib/src/google_fonts_variant.dart" 2>/dev/null | head -1)
-            if [ -n "$GOOGLE_FONTS_FILE" ] && [ -f "$GOOGLE_FONTS_FILE" ]; then
-              sed -i '' 's/const _fontWeightToFilenameWeightParts = {/final _fontWeightToFilenameWeightParts = {/' "$GOOGLE_FONTS_FILE"
-              echo "✅ Patch google_fonts: $GOOGLE_FONTS_FILE"
-              break
-            fi
-          done
-
-          # Patch 3: flutter_quill - adicionar onFocusReceived
-          for dir in "$(dirname "$(pwd)")/.pub-cache" "$HOME/.pub-cache" "$HOME/.cache/pub" "${PUB_CACHE}" /tmp/pub_cache /tmp/.pub-cache /Users/builder/.pub-cache; do
-            [ -z "$dir" ] && continue
-            QUILL_MIXIN_FILE=$(find "$dir" -path "*/flutter_quill-*/lib/src/editor/raw_editor/raw_editor_state_text_input_client_mixin.dart" 2>/dev/null | head -1)
-            if [ -n "$QUILL_MIXIN_FILE" ] && [ -f "$QUILL_MIXIN_FILE" ]; then
-              sed -i '' '$ d' "$QUILL_MIXIN_FILE"
-              printf '  @override\n  bool onFocusReceived() => false;\n}\n' >> "$QUILL_MIXIN_FILE"
-              echo "✅ Patch flutter_quill (onFocusReceived): $QUILL_MIXIN_FILE"
-              break
-            fi
-          done
+          # Aplica patches via Dart (usa package_config.json para localizar arquivos)
+          dart run tool/patch_packages.dart
 
       - name: Instalar dependências do CocoaPods
         script: |
           cd ios && pod install --repo-update
 
-      - name: Build iOS Release (sem codesign)
+      - name: Build iOS Release
         script: |
-          flutter build ios --release --no-codesign \
+          flutter build ios --release \
             --build-name=1.3.2 \
-            --build-number=$(($(date +%s)))
+            --build-number=$(($(date +%s))) \
+            --export-method development
 
       - name: Empacotar como IPA
         script: |
