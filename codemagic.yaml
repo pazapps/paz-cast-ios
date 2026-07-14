@@ -3,8 +3,6 @@ workflows:
     name: Paz Castanhal - iOS
     max_build_duration: 90
     instance_type: mac_mini_m2
-    integrations:
-      app_store_connect: Igreja da Paz de Castanhal
     environment:
       flutter: stable
       xcode: latest
