@@ -4,6 +4,8 @@ workflows:
     max_build_duration: 90
     instance_type: mac_mini_m2
     environment:
+      groups:
+        - app_store_credentials # Nome do grupo onde você salvou as variáveis da Apple no Codemagic
       flutter: stable
       xcode: latest
       cocoapods: default
@@ -38,21 +40,31 @@ workflows:
         script: |
           cd ios && pod install --repo-update
 
-      - name: Build iOS (release)
+      - name: Initialize keychain
         script: |
-          flutter build ios --release --no-codesign \
-            --build-name=1.3.2 \
+          keychain initialize
+
+      - name: Fetch signing files from Apple
+        script: |
+          # Busca automaticamente o certificado de distribuição iOS e o perfil correspondente para o app
+          app-store-connect fetch-signing-files "com.app.p1674HE" --type IOS_APP_STORE --create
+
+      - name: Use certificates
+        script: |
+          keychain add-certificates
+
+      - name: Build Flutter iOS IPA (Assinado)
+        script: |
+          # Compila e assina o app usando a nova versão 3.0.0
+          flutter build ipa --release \
+            --export-method app-store \
+            --build-name=3.0.0 \
             --build-number=$(($(date +%s)))
 
-      - name: Empacotar como IPA
-        script: |
-          mkdir -p build/ios/ipa/Payload
-          cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
-          cd build/ios/ipa
-          zip -r "$(pwd)/PazCastanhal.ipa" Payload/
     artifacts:
-      - build/ios/ipa/PazCastanhal.ipa
-      - build/ios/iphoneos/Runner.app
+      # O próprio Flutter gera o .ipa na pasta padrão ao usar o comando 'flutter build ipa'
+      - build/ios/ipa/*.ipa
+    
     publishing:
       email:
         recipients:
@@ -60,3 +72,8 @@ workflows:
         notify:
           success: true
           failure: true
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY # Propriedade correta ajustada aqui
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true # Envia o app assinado direto para o TestFlight
