@@ -5,7 +5,7 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       groups:
-        - app_store_credentials # Nome do grupo onde você salvou as variáveis da Apple no Codemagic
+        - pazcastanhal # Nome do grupo onde você salvou as variáveis da Apple no Codemagic
       flutter: stable
       xcode: latest
       cocoapods: default
